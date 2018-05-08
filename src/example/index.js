@@ -1,34 +1,42 @@
 import React, { Component } from 'react';
 
+import { invert } from 'color-invert';
+import { saveAs } from 'file-saver';
 import Animated from 'react-animated-transitions';
 import Paper from 'material-ui/Paper';
 import styled from 'styled-components';
-import { saveAs } from 'file-saver';
 
 import Art from '../lib';
 import IconBtn from './IconBtn';
 
-import { invert, getRandom } from './utils';
+import maps from './maps';
+import palettes from './palettes';
 
-import './example.css';
+import './app.css';
 
 const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+const getRandom = () => ({
+  map: maps[Math.floor(Math.random() * maps.length)],
+  palette: palettes[Math.floor(Math.random() * palettes.length)]
+});
 
 class Example extends Component {
   state = {
     custom: false,
-    // start in full screen if mobile
-    full: isMobile,
+    full: isMobile, // start in full screen if mobile
     map: getRandom().map,
     more: false,
-    palette: ['#21242b', '#61dafb', '#6d6d6d', '#292c34', '#fff'],
-    stopped: false,
-    mounted: false
+    mounted: false,
+    palette: ['#21242b', '#61dafb', '#6d6d6d', '#292c34', '#fff'], // react colors
+    stopped: false
   };
 
-  more = () => this.setState({ more: !this.state.more });
+  randomize = () => this.setState(getRandom(), () => this.drawArt());
 
-  draw = () => {
+  toggleMoreActions = () => this.setState({ more: !this.state.more });
+
+  drawArt = () => {
     // just a trick for a smooth transition when re-drawing
     if (this.art.metadata().palette)
       document.body.style.background = this.art.metadata().palette[0];
@@ -38,45 +46,38 @@ class Example extends Component {
     this.setState({ palette: this.art.metadata().palette, stopped: false });
   };
 
-  randomize = () => {
-    const random = getRandom();
-
-    this.setState({ map: random.map, palette: random.palette }, () =>
-      this.draw()
-    );
-  };
-
-  stop = () => {
+  stopDrawing = () => {
     this.art.stop();
 
     this.setState({ stopped: true });
   };
 
-  customize = () => this.setState({ custom: !this.state.custom });
+  customizePalette = () => this.setState({ custom: !this.state.custom });
 
-  apply = () => this.setState({ custom: false }, () => this.draw());
+  updatePaletteColor = (i, color) => {
+    const newPallete = this.state.palette;
+    newPallete[i] = color;
+    this.setState({ palette: newPallete });
+  };
 
-  full = () => this.setState({ full: !this.state.full }, () => this.draw());
+  applyPalette = () => this.setState({ custom: false }, () => this.drawArt());
 
-  download = () => {
-    this.stop();
+  toggleFullMode = () =>
+    this.setState({ full: !this.state.full }, () => this.drawArt());
+
+  downloadArt = () => {
+    this.stopDrawing();
 
     this.art
       .ref()
       .toBlob(blob => saveAs(blob, `${this.art.metadata().seed}.png`));
   };
 
-  update = (i, color) => {
-    const newPallete = this.state.palette;
-    newPallete[i] = color;
-    this.setState({ palette: newPallete });
-  };
-
-  link = ref => {
+  createRef = ref => {
     this.art = ref;
 
     if (!this.state.mounted)
-      this.setState({ mounted: true }, () => this.draw());
+      this.setState({ mounted: true }, () => this.drawArt());
   };
 
   renderArt = () => {
@@ -101,7 +102,7 @@ class Example extends Component {
         <Art
           map={this.state.map}
           palette={this.state.palette}
-          ref={this.link}
+          ref={this.createRef}
         />
       );
     }
@@ -114,21 +115,29 @@ class Example extends Component {
           height={size}
           map={this.state.map}
           palette={this.state.palette}
-          ref={this.link}
+          ref={this.createRef}
           width={size}
         />
       </Canvas>
     );
   };
 
-  renderActions = () => (
+  renderMoreActions = () => (
     <div>
       <IconBtn name="Shuffle" onClick={this.randomize} />
-      <IconBtn name="Pause" onClick={this.stop} disabled={this.state.stopped} />
-      <IconBtn name="ColorLens" onClick={this.draw} />
-      <IconBtn name="FormatColorFill" onClick={this.customize} />
-      {!isMobile && <IconBtn name="Fullscreen" onClick={this.full} />}
-      <IconBtn name="FileDownload" onClick={this.download} />
+
+      <IconBtn
+        name="Pause"
+        onClick={this.stopDrawing}
+        disabled={this.state.stopped}
+      />
+
+      <IconBtn name="ColorLens" onClick={this.drawArt} />
+      <IconBtn name="FormatColorFill" onClick={this.customizePalette} />
+
+      {!isMobile && <IconBtn name="Fullscreen" onClick={this.toggleFullMode} />}
+
+      <IconBtn name="FileDownload" onClick={this.downloadArt} />
     </div>
   );
 
@@ -139,7 +148,7 @@ class Example extends Component {
       <Palette>
         {this.state.palette.map((color, i) => (
           <Input
-            onChange={e => this.update(i, e.target.value)}
+            onChange={e => this.updatePaletteColor(i, e.target.value)}
             style={{
               backgroundColor: this.state.palette[i],
               color: invert(this.state.palette[i])
@@ -148,15 +157,12 @@ class Example extends Component {
           />
         ))}
 
-        <IconBtn name="Check" onClick={this.apply} />
+        <IconBtn name="Check" onClick={this.applyPalette} />
       </Palette>
     );
   };
 
   render() {
-    // <IconBtn name="Input" onClick={this.input} />
-    // <IconBtn name="Photo" onClick={this.upload} />
-
     const { more, custom } = this.state;
 
     return (
@@ -166,10 +172,10 @@ class Example extends Component {
 
           <Actions>
             <Row>
-              <IconBtn name="Settings" onClick={this.more} />
+              <IconBtn name="Settings" onClick={this.toggleMoreActions} />
 
               <Animated items>
-                {more && <Animated item>{this.renderActions()}</Animated>}
+                {more && <Animated item>{this.renderMoreActions()}</Animated>}
               </Animated>
             </Row>
 
@@ -219,6 +225,7 @@ const Input = styled.input`
   padding-right: 10px;
   text-align: center;
   width: 60px;
+
   &:hover {
     opacity: 1;
   }
