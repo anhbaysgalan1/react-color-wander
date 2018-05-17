@@ -4,7 +4,7 @@
 
 <img src="https://raw.githubusercontent.com/sonaye/react-color-wander/master/demo.gif" width="400">
 
-# Live Demo
+## Live Demo
 
 You can view the algorithm in real-time here:
 
@@ -12,22 +12,11 @@ https://sonaye.github.io/react-color-wander
 
 In Chrome, you can right-click the canvas an "Save As" to get the full resolution.
 
-# Output
-
-Here are a few examples.
-
-<img src="http://i.imgur.com/VU7G4LX.jpg" width="85%" />
-<img src="http://i.imgur.com/ooYrDUW.jpg" width="85%" />
-<img src="http://i.imgur.com/dTb32La.jpg" width="85%" />
-<img src="http://i.imgur.com/IrZGveh.jpg" width="85%" />
-<img src="http://i.imgur.com/TyI4sQX.jpg" width="85%" />
-<img src="http://i.imgur.com/5QRD3Ps.jpg" width="85%" />
-
-# Installation
+## Installation
 
 `yarn add react-color-wander`
 
-# Usage
+## Usage
 
 ```javascript
 import Art from 'react-color-wander';
@@ -56,6 +45,17 @@ this.art.metadata();
 // to get a ref. to the canvas
 this.art.ref();
 ```
+
+## Output
+
+Here are a few examples.
+
+<img src="http://i.imgur.com/VU7G4LX.jpg" width="85%" />
+<img src="http://i.imgur.com/ooYrDUW.jpg" width="85%" />
+<img src="http://i.imgur.com/dTb32La.jpg" width="85%" />
+<img src="http://i.imgur.com/IrZGveh.jpg" width="85%" />
+<img src="http://i.imgur.com/TyI4sQX.jpg" width="85%" />
+<img src="http://i.imgur.com/5QRD3Ps.jpg" width="85%" />
 
 ## Example
 
